@@ -54,7 +54,12 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
-    'frontend_url' => env('FRONTEND_URL', 'http://localhost:5173'),
+    'frontend_url' => env('FRONTEND_URL', 'http://rosado.websture.in'),
+
+    // Empty when Laravel is deployed into its own "admin" folder on the live
+    // server (that folder name already supplies the /admin segment); 'admin'
+    // when the app is mounted at the root, e.g. local `php artisan serve`.
+    'admin_route_prefix' => env('ADMIN_ROUTE_PREFIX', 'admin'),
 
     /*
     |--------------------------------------------------------------------------

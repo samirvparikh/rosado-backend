@@ -1,0 +1,14 @@
+<IfModule mod_rewrite.c>
+
+    RewriteEngine On
+
+    # Laravel's Vite build output and public/storage symlink physically live under public/,
+    # but @vite()/asset() generate URLs as if public/ were the document root — bridge that gap.
+    RewriteRule ^(build|storage)/(.*)$ public/$1/$2 [L]
+
+    # Everything else that isn't a real file/directory goes to Laravel's front controller.
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php [L]
+
+</IfModule>
