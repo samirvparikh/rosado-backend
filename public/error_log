@@ -1,0 +1,25 @@
+[01-Oct-2026 09:27:14 UTC] PHP Warning:  require(/home/websture/rosado.websture.in/admin/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/websture/rosado.websture.in/admin/public/index.php on line 14
+[01-Oct-2026 09:27:14 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/websture/rosado.websture.in/admin/public/../vendor/autoload.php' (include_path='.:/opt/alt/php83/usr/share/pear:/opt/alt/php83/usr/share/php:/usr/share/pear:/usr/share/php') in /home/websture/rosado.websture.in/admin/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/websture/rosado.websture.in/admin/public/index.php on line 14
+[01-Oct-2026 09:27:14 UTC] PHP Warning:  require(/home/websture/rosado.websture.in/admin/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/websture/rosado.websture.in/admin/public/index.php on line 14
+[01-Oct-2026 09:27:14 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/websture/rosado.websture.in/admin/public/../vendor/autoload.php' (include_path='.:/opt/alt/php83/usr/share/pear:/opt/alt/php83/usr/share/php:/usr/share/pear:/usr/share/php') in /home/websture/rosado.websture.in/admin/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/websture/rosado.websture.in/admin/public/index.php on line 14
+[01-Oct-2026 09:27:20 UTC] PHP Warning:  require(/home/websture/rosado.websture.in/admin/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/websture/rosado.websture.in/admin/public/index.php on line 14
+[01-Oct-2026 09:27:20 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/websture/rosado.websture.in/admin/public/../vendor/autoload.php' (include_path='.:/opt/alt/php83/usr/share/pear:/opt/alt/php83/usr/share/php:/usr/share/pear:/usr/share/php') in /home/websture/rosado.websture.in/admin/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/websture/rosado.websture.in/admin/public/index.php on line 14
+[01-Oct-2026 09:47:24 UTC] PHP Warning:  require(/home/websture/rosado.websture.in/admin/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/websture/rosado.websture.in/admin/public/index.php on line 14
+[01-Oct-2026 09:47:24 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/websture/rosado.websture.in/admin/public/../vendor/autoload.php' (include_path='.:/opt/alt/php83/usr/share/pear:/opt/alt/php83/usr/share/php:/usr/share/pear:/usr/share/php') in /home/websture/rosado.websture.in/admin/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/websture/rosado.websture.in/admin/public/index.php on line 14
+[01-Oct-2026 09:47:24 UTC] PHP Warning:  require(/home/websture/rosado.websture.in/admin/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/websture/rosado.websture.in/admin/public/index.php on line 14
+[01-Oct-2026 09:47:24 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/websture/rosado.websture.in/admin/public/../vendor/autoload.php' (include_path='.:/opt/alt/php83/usr/share/pear:/opt/alt/php83/usr/share/php:/usr/share/pear:/usr/share/php') in /home/websture/rosado.websture.in/admin/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/websture/rosado.websture.in/admin/public/index.php on line 14
