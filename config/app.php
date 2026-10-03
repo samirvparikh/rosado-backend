@@ -56,10 +56,10 @@ return [
 
     'frontend_url' => env('FRONTEND_URL', 'http://rosado.websture.in'),
 
-    // Empty when Laravel is deployed into its own "admin" folder on the live
-    // server (that folder name already supplies the /admin segment); 'admin'
-    // when the app is mounted at the root, e.g. local `php artisan serve`.
-    'admin_route_prefix' => env('ADMIN_ROUTE_PREFIX', 'admin'),
+    // Admin is served from its own subdomain (admin.rosado.websture.in), so
+    // routes sit at the root: /login, /products, ... Set ADMIN_ROUTE_PREFIX=admin
+    // only when the app shares a host with the storefront and needs /admin/*.
+    'admin_route_prefix' => env('ADMIN_ROUTE_PREFIX', ''),
 
     /*
     |--------------------------------------------------------------------------
