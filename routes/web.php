@@ -15,15 +15,8 @@ use App\Http\Controllers\Admin\SizeController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
-$adminPrefix = config('app.admin_route_prefix');
-
-if ($adminPrefix !== '') {
-    // Root-mounted (e.g. local `php artisan serve`): bare "/" isn't a real
-    // page here, send visitors to the actual storefront.
-    Route::get('/', fn () => redirect(config('app.frontend_url')));
-}
-
-Route::prefix($adminPrefix)->name('admin.')->group(function () {
+// Admin lives on its own subdomain, so its routes sit at the root: /login, /products, ...
+Route::name('admin.')->group(function () {
     Route::middleware('guest')->group(function () {
         Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
         Route::post('/login', [AuthController::class, 'login'])->name('login.attempt');
