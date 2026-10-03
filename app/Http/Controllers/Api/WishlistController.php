@@ -12,7 +12,7 @@ class WishlistController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $products = $request->user()->wishlists()->with('product.images', 'product.sizes', 'product.classifications')->get()
+        $products = $request->user()->wishlists()->with('product.images', 'product.sizes.size', 'product.classifications')->get()
             ->pluck('product')
             ->filter();
 

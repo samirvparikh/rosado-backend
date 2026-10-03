@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\ProductSize;
 use App\Models\Size;
+use App\Support\ImageUpload;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -115,15 +116,18 @@ class ProductController extends Controller
         }
 
         ProductImage::where('product_id', $product->id)->delete();
-        foreach ($data['images'] as $index => $image) {
-            if (empty($image['image_url'])) {
+        $sortOrder = 0;
+        foreach ($data['images'] as $image) {
+            // A freshly uploaded file replaces whatever URL the slot had.
+            $url = isset($image['file']) ? ImageUpload::store($image['file'], 'products') : ($image['image_url'] ?? null);
+            if (empty($url) || ! empty($image['remove'])) {
                 continue;
             }
             ProductImage::create([
                 'product_id' => $product->id,
-                'image_url' => $image['image_url'],
+                'image_url' => $url,
                 'image_type' => $image['image_type'] ?? 'GALLERY',
-                'sort_order' => $index,
+                'sort_order' => $sortOrder++,
                 'is_primary' => ! empty($image['is_primary']),
                 'status' => 'ACTIVE',
                 'alt' => $image['alt'] ?? '',
@@ -141,7 +145,9 @@ class ProductController extends Controller
             'short_description' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
             'brand' => ['required', 'string', 'max:100'],
-            'status' => ['required', 'in:ACTIVE,INACTIVE'],
+            'tags' => ['nullable', 'string', 'max:1000'],
+            'is_online' => ['sometimes', 'boolean'],
+            'in_stock' => ['sometimes', 'boolean'],
             'tax_rate' => ['required', 'numeric', 'min:0', 'max:100'],
             'discount_type' => ['required', 'in:PERCENT,FLAT,NONE'],
             'discount_value' => ['required', 'numeric', 'min:0'],
@@ -162,7 +168,9 @@ class ProductController extends Controller
             'sizes.*.cost_price' => ['nullable', 'numeric', 'min:0'],
             'sizes.*.stock' => ['nullable', 'integer', 'min:0'],
             'sizes.*.status' => ['nullable', 'in:ACTIVE,INACTIVE'],
-            'images' => ['array'],
+            'images' => ['array', 'max:'.self::IMAGE_SLOTS],
+            'images.*.file' => ['nullable', ...ImageUpload::RULES],
+            'images.*.remove' => ['sometimes'],
             'images.*.image_url' => ['nullable', 'string', 'max:500'],
             'images.*.image_type' => ['nullable', 'in:MAIN,GALLERY,LIFESTYLE,PACKAGING,DETAIL'],
             'images.*.alt' => ['nullable', 'string', 'max:255'],
@@ -179,8 +187,18 @@ class ProductController extends Controller
 
         $product = collect($validated)->only([
             'id', 'sku', 'name', 'slug', 'product_type', 'short_description', 'description', 'brand',
-            'status', 'tax_rate', 'discount_type', 'discount_value', 'rating', 'review_count', 'fragrance_id',
+            'tax_rate', 'discount_type', 'discount_value', 'rating', 'review_count', 'fragrance_id',
         ])->all();
+
+        // "Online" = visible on the storefront, stored as the existing status column.
+        $product['status'] = $request->boolean('is_online') ? 'ACTIVE' : 'INACTIVE';
+        $product['in_stock'] = $request->boolean('in_stock');
+        $product['tags'] = collect(explode(',', (string) ($validated['tags'] ?? '')))
+            ->map(fn ($tag) => trim($tag))
+            ->filter()
+            ->unique(fn ($tag) => mb_strtolower($tag))
+            ->values()
+            ->all();
 
         foreach (['is_new_arrival', 'is_best_seller', 'is_featured', 'is_limited_edition', 'is_trending', 'is_sale'] as $flag) {
             $product[$flag] = $request->boolean($flag);
@@ -190,7 +208,8 @@ class ProductController extends Controller
             'product' => $product,
             'classificationIds' => $validated['classifications'] ?? [],
             'sizes' => $validated['sizes'] ?? [],
-            'images' => array_values($validated['images'] ?? []),
+            // Validated keys follow rule order, not slot order -- restore slot order.
+            'images' => collect($validated['images'] ?? [])->sortKeys()->values()->all(),
         ];
     }
 }

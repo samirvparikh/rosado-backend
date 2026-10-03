@@ -23,6 +23,10 @@ class ReadyMadePricer
             throw new ApiException('This size is unavailable.', 422, 'UNKNOWN_ENTITY');
         }
 
+        if (! $product->in_stock || $sizeRow->stock < 1) {
+            throw new ApiException('This perfume is sold out.', 422, 'OUT_OF_STOCK');
+        }
+
         if ($sizeRow->stock < $quantity) {
             throw new ApiException('Insufficient stock for this size.', 422, 'OUT_OF_STOCK');
         }

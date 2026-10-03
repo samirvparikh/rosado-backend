@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\ClassificationController;
 use App\Http\Controllers\Api\CustomPerfumeController;
 use App\Http\Controllers\Api\FragranceController;
+use App\Http\Controllers\Api\OfferController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ShippingMethodController;
@@ -39,6 +40,9 @@ Route::get('/fragrances/{id}', [FragranceController::class, 'show']);
 // Bottle/Cap are custom-perfume components, never standalone products (Rules 1-4).
 Route::get('/bottles', [BottleController::class, 'index']);
 Route::get('/caps', [CapController::class, 'index']);
+
+// Homepage offer header marquee -- managed in admin under Content > Offer Header.
+Route::get('/offers', [OfferController::class, 'index']);
 
 Route::get('/shipping-methods', [ShippingMethodController::class, 'index']);
 

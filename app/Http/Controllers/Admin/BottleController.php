@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Bottle;
 use App\Models\BottleInventory;
 use App\Models\Size;
+use App\Support\ImageUpload;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -77,6 +78,7 @@ class BottleController extends Controller
             'name' => ['required', 'string', 'max:150'],
             'code' => ['required', 'string', 'max:50', 'unique:bottles,code'.($isCreate ? '' : ",{$request->route('bottle')?->id},id")],
             'image' => ['nullable', 'string', 'max:500'],
+            'image_file' => ['nullable', ...ImageUpload::RULES],
             'size_id' => ['required', 'exists:sizes,id'],
             'additional_price' => ['required', 'numeric', 'min:0'],
             'stock' => ['required', 'integer', 'min:0'],
@@ -88,6 +90,13 @@ class BottleController extends Controller
             $rules['id'] = ['required', 'string', 'max:30', 'unique:bottles,id'];
         }
 
-        return $request->validate($rules);
+        $data = $request->validate($rules);
+
+        if ($request->hasFile('image_file')) {
+            $data['image'] = ImageUpload::store($request->file('image_file'), 'bottles');
+        }
+        unset($data['image_file']);
+
+        return $data;
     }
 }

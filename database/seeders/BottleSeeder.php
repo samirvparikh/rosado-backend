@@ -10,13 +10,14 @@ class BottleSeeder extends Seeder
 {
     public function run(): void
     {
+        // Transparent, capless artwork: the builder preview layers the chosen cap and label on top.
         $bottles = [
-            ['BTL001', 'Atelier Clear 30 ML', 'SIZE30', 'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=700&q=80', 0, 40, 1],
-            ['BTL002', 'Premium Glass 50 ML', 'SIZE50', 'https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=700&q=80', 50, 28, 1],
-            ['BTL003', 'Classic Glass 50 ML', 'SIZE50', 'https://images.unsplash.com/photo-1615634260167-c8cdede054de?auto=format&fit=crop&w=700&q=80', 0, 36, 2],
-            ['BTL004', 'Sculpted Crystal 100 ML', 'SIZE100', 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=700&q=80', 120, 18, 1],
-            ['BTL005', 'Noir Column 100 ML', 'SIZE100', 'https://images.unsplash.com/photo-1523293182086-7651a91dcd38?auto=format&fit=crop&w=700&q=80', 80, 22, 2],
-            ['BTL006', 'Archive Flacon 30 ML', 'SIZE30', 'https://images.unsplash.com/photo-1587017539504-67cfbddac569?auto=format&fit=crop&w=700&q=80', 30, 16, 2],
+            ['BTL001', 'Atelier Clear 30 ML', 'SIZE30', '/images/bottles/atelier-clear-30.svg', 0, 40, 1],
+            ['BTL002', 'Premium Glass 50 ML', 'SIZE50', '/images/bottles/premium-glass-50.svg', 50, 28, 1],
+            ['BTL003', 'Classic Glass 50 ML', 'SIZE50', '/images/bottles/classic-glass-50.svg', 0, 36, 2],
+            ['BTL004', 'Sculpted Crystal 100 ML', 'SIZE100', '/images/bottles/sculpted-crystal-100.svg', 120, 18, 1],
+            ['BTL005', 'Noir Column 100 ML', 'SIZE100', '/images/bottles/noir-column-100.svg', 80, 22, 2],
+            ['BTL006', 'Archive Flacon 30 ML', 'SIZE30', '/images/bottles/archive-flacon-30.svg', 30, 16, 2],
         ];
 
         foreach ($bottles as [$id, $name, $sizeId, $image, $additionalPrice, $stock, $sortOrder]) {

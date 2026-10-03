@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Cap;
 use App\Models\CapInventory;
+use App\Support\ImageUpload;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -72,6 +73,7 @@ class CapController extends Controller
             'name' => ['required', 'string', 'max:150'],
             'code' => ['required', 'string', 'max:50', 'unique:caps,code'.($isCreate ? '' : ",{$request->route('cap')?->id},id")],
             'image' => ['nullable', 'string', 'max:500'],
+            'image_file' => ['nullable', ...ImageUpload::RULES],
             'additional_price' => ['required', 'numeric', 'min:0'],
             'stock' => ['required', 'integer', 'min:0'],
             'sort_order' => ['required', 'integer', 'min:0'],
@@ -82,6 +84,13 @@ class CapController extends Controller
             $rules['id'] = ['required', 'string', 'max:30', 'unique:caps,id'];
         }
 
-        return $request->validate($rules);
+        $data = $request->validate($rules);
+
+        if ($request->hasFile('image_file')) {
+            $data['image'] = ImageUpload::store($request->file('image_file'), 'caps');
+        }
+        unset($data['image_file']);
+
+        return $data;
     }
 }

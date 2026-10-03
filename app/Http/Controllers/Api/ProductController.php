@@ -22,7 +22,7 @@ class ProductController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $products = Product::with(['images', 'sizes', 'classifications'])
+        $products = Product::with(['images', 'sizes.size', 'classifications'])
             ->where('status', 'ACTIVE')
             ->where('product_type', 'READY_MADE')
             ->get();
@@ -90,8 +90,9 @@ class ProductController extends Controller
             }
             if ($search !== '') {
                 $familyText = implode(' ', $product->classifications->where('group', 'FRAGRANCE_FAMILY')->pluck('name')->all());
-                $haystack = strtolower("{$product->name} {$product->short_description} {$familyText}");
-                if (! str_contains($haystack, strtolower($search))) {
+                $tagText = implode(' ', $product->tagList());
+                $haystack = mb_strtolower("{$product->name} {$product->short_description} {$familyText} {$tagText}");
+                if (! str_contains($haystack, mb_strtolower($search))) {
                     return false;
                 }
             }
@@ -114,7 +115,7 @@ class ProductController extends Controller
 
     public function show(string $slug): JsonResponse
     {
-        $product = Product::with(['images', 'sizes', 'classifications', 'fragrance'])
+        $product = Product::with(['images', 'sizes.size', 'classifications', 'fragrance'])
             ->where('slug', $slug)
             ->where('status', 'ACTIVE')
             ->first();
@@ -124,7 +125,7 @@ class ProductController extends Controller
 
     public function featured(): JsonResponse
     {
-        $products = Product::with(['images', 'sizes', 'classifications'])
+        $products = Product::with(['images', 'sizes.size', 'classifications'])
             ->where('status', 'ACTIVE')->where('product_type', 'READY_MADE')
             ->where('is_featured', true)
             ->get();
@@ -134,7 +135,7 @@ class ProductController extends Controller
 
     public function bestSellers(): JsonResponse
     {
-        $products = Product::with(['images', 'sizes', 'classifications'])
+        $products = Product::with(['images', 'sizes.size', 'classifications'])
             ->where('status', 'ACTIVE')->where('product_type', 'READY_MADE')
             ->where('is_best_seller', true)
             ->get();
@@ -162,7 +163,7 @@ class ProductController extends Controller
 
         $familyIds = $product->classificationIdsByGroup('FRAGRANCE_FAMILY');
 
-        $candidates = Product::with(['images', 'sizes', 'classifications'])
+        $candidates = Product::with(['images', 'sizes.size', 'classifications'])
             ->where('status', 'ACTIVE')->where('product_type', 'READY_MADE')
             ->where('id', '!=', $product->id)
             ->get()

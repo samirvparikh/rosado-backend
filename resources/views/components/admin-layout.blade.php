@@ -34,6 +34,9 @@
                         ['label' => 'Coupons', 'route' => 'admin.coupons.index', 'pattern' => 'admin.coupons.*'],
                         ['label' => 'Shipping Methods', 'route' => 'admin.shipping-methods.index', 'pattern' => 'admin.shipping-methods.*'],
                     ],
+                    'Content' => [
+                        ['label' => 'Offer Header', 'route' => 'admin.offers.index', 'pattern' => 'admin.offers.*'],
+                    ],
                     'People' => [
                         ['label' => 'Customers', 'route' => 'admin.users.index', 'pattern' => 'admin.users.*'],
                     ],

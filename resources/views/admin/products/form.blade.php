@@ -6,7 +6,7 @@
 @endphp
 <x-admin-layout :title="$product ? 'Edit Product' : 'New Product'">
     <div class="max-w-4xl rounded-lg border border-neutral-200 bg-white p-6">
-        <form method="POST" action="{{ $product ? route('admin.products.update', $product) : route('admin.products.store') }}" class="space-y-8">
+        <form method="POST" action="{{ $product ? route('admin.products.update', $product) : route('admin.products.store') }}" enctype="multipart/form-data" class="space-y-8">
             @csrf
             @if ($product) @method('PUT') @endif
 
@@ -19,9 +19,27 @@
                 <x-admin.field name="slug" label="Slug" :value="$product?->slug" required />
                 <x-admin.field name="brand" label="Brand" :value="$product?->brand ?? 'ROSADO'" required />
                 <x-admin.select name="product_type" label="Product Type" :options="['READY_MADE' => 'Ready Made', 'CUSTOM_PERFUME' => 'Custom Perfume', 'GIFT_SET' => 'Gift Set', 'BUNDLE' => 'Bundle', 'LIMITED_EDITION' => 'Limited Edition']" :selected="$product?->product_type ?? 'READY_MADE'" required />
-                <x-admin.select name="status" label="Status" :options="['ACTIVE' => 'Active', 'INACTIVE' => 'Inactive']" :selected="$product?->status ?? 'ACTIVE'" required />
                 <x-admin.select name="fragrance_id" label="Signature Fragrance (for PDP notes)" :options="$fragrances" :selected="$product?->fragrance_id" blank="None" />
             </section>
+
+            <section>
+                <p class="text-xs font-medium uppercase tracking-wider text-neutral-500">Availability</p>
+                <div class="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <label class="flex items-start gap-3 rounded-md border border-neutral-200 p-3 text-sm text-neutral-700">
+                        <input type="checkbox" name="is_online" value="1" @checked(old('is_online', $product ? $product->status === 'ACTIVE' : true)) class="mt-0.5 rounded border-neutral-300">
+                        <span><span class="font-medium text-neutral-900">Online</span><br><span class="text-xs text-neutral-500">Show this perfume on the website.</span></span>
+                    </label>
+                    <label class="flex items-start gap-3 rounded-md border border-neutral-200 p-3 text-sm text-neutral-700">
+                        <input type="checkbox" name="in_stock" value="1" @checked(old('in_stock', $product?->in_stock ?? true)) class="mt-0.5 rounded border-neutral-300">
+                        <span><span class="font-medium text-neutral-900">In Stock</span><br><span class="text-xs text-neutral-500">Untick to show it as Sold Out (cannot be added to cart).</span></span>
+                    </label>
+                </div>
+            </section>
+
+            <div>
+                <x-admin.field name="tags" label="Tags (comma separated)" :value="implode(', ', $product?->tags ?? [])" placeholder="e.g. oud, gift, evening, long lasting" />
+                <p class="mt-1 text-xs text-neutral-400">Shown on the perfume page and matched by the website search.</p>
+            </div>
 
             <x-admin.field name="short_description" label="Short Description" :value="$product?->short_description" required />
             <x-admin.textarea name="description" label="Description" :value="$product?->description" required />
@@ -86,22 +104,42 @@
             </section>
 
             <section>
-                <p class="text-xs font-medium uppercase tracking-wider text-neutral-500">Images</p>
+                <p class="text-xs font-medium uppercase tracking-wider text-neutral-500">Images (up to {{ $imageSlots }})</p>
+                <p class="text-xs text-neutral-400">Upload a file or paste an image URL. The primary image shows on product cards; the next image appears when the card is hovered. JPG, PNG, WEBP, GIF or SVG, max 5 MB each.</p>
+                @error('images')<p class="mt-1 text-xs text-rose-600">{{ $message }}</p>@enderror
                 <div class="mt-2 space-y-3">
                     @for ($i = 0; $i < $imageSlots; $i++)
                         @php $image = $imageAt($i); @endphp
                         <div class="grid grid-cols-1 gap-3 rounded-md border border-neutral-200 p-3 sm:grid-cols-12 sm:items-end">
+                            <div class="flex items-center gap-3 sm:col-span-12">
+                                @if ($image)
+                                    <img src="{{ $image->image_url }}" alt="" class="h-16 w-16 rounded object-cover">
+                                @else
+                                    <div class="flex h-16 w-16 items-center justify-center rounded bg-neutral-100 text-xs text-neutral-400">{{ $i + 1 }}</div>
+                                @endif
+                                <div class="flex-1">
+                                    <label for="images_{{ $i }}_file" class="block text-xs font-medium uppercase tracking-wider text-neutral-500">{{ $image ? 'Replace image' : 'Upload image' }}</label>
+                                    <input id="images_{{ $i }}_file" type="file" name="images[{{ $i }}][file]" accept="image/*" class="mt-1.5 block w-full text-sm text-neutral-600 file:mr-3 file:rounded-md file:border-0 file:bg-neutral-100 file:px-3 file:py-2 file:text-xs file:font-medium file:text-neutral-700 hover:file:bg-neutral-200">
+                                    @error('images.'.$i.'.file')<p class="mt-1 text-xs text-rose-600">{{ $message }}</p>@enderror
+                                </div>
+                                @if ($image)
+                                    <label class="flex items-center gap-2 text-xs text-rose-600">
+                                        <input type="checkbox" name="images[{{ $i }}][remove]" value="1" class="rounded border-neutral-300">
+                                        Remove
+                                    </label>
+                                @endif
+                            </div>
                             <div class="sm:col-span-5">
-                                <x-admin.field :name="'images['.$i.'][image_url]'" label="Image URL" :value="$image?->image_url" />
+                                <x-admin.field :name="'images['.$i.'][image_url]'" label="or Image URL" :value="$image?->image_url" />
                             </div>
                             <div class="sm:col-span-3">
-                                <x-admin.select :name="'images['.$i.'][image_type]'" label="Type" :options="['MAIN' => 'Main', 'GALLERY' => 'Gallery', 'LIFESTYLE' => 'Lifestyle', 'PACKAGING' => 'Packaging', 'DETAIL' => 'Detail']" :selected="$image?->image_type ?? 'GALLERY'" />
+                                <x-admin.select :name="'images['.$i.'][image_type]'" label="Type" :options="['MAIN' => 'Main', 'GALLERY' => 'Gallery', 'LIFESTYLE' => 'Lifestyle', 'PACKAGING' => 'Packaging', 'DETAIL' => 'Detail']" :selected="$image?->image_type ?? ($i === 0 ? 'MAIN' : 'GALLERY')" />
                             </div>
                             <div class="sm:col-span-3">
                                 <x-admin.field :name="'images['.$i.'][alt]'" label="Alt Text" :value="$image?->alt" />
                             </div>
                             <label class="flex items-center gap-2 pb-2 text-xs text-neutral-600 sm:col-span-1">
-                                <input type="checkbox" name="images[{{ $i }}][is_primary]" value="1" @checked($image?->is_primary) class="rounded border-neutral-300">
+                                <input type="checkbox" name="images[{{ $i }}][is_primary]" value="1" @checked($image ? $image->is_primary : (! $product && $i === 0)) class="rounded border-neutral-300">
                                 Primary
                             </label>
                         </div>

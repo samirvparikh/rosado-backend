@@ -9,7 +9,7 @@ class OrderItem extends Model
 {
     protected $fillable = [
         'order_id', 'product_type', 'product_name', 'size_name', 'fragrance_name', 'bottle_name',
-        'cap_name', 'quantity', 'base_price', 'bottle_price', 'cap_price', 'discount', 'tax',
+        'cap_name', 'remarks', 'label_line1', 'label_line2', 'quantity', 'base_price', 'bottle_price', 'cap_price', 'discount', 'tax',
         'final_price', 'image',
     ];
 

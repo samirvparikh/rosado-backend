@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\ClassificationController;
 use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FragranceController;
+use App\Http\Controllers\Admin\OfferController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ShippingMethodController;
@@ -38,6 +39,7 @@ Route::prefix($adminPrefix)->name('admin.')->group(function () {
         Route::resource('caps', CapController::class)->except('show');
         Route::resource('sizes', SizeController::class)->except('show');
         Route::resource('classifications', ClassificationController::class)->except('show');
+        Route::resource('offers', OfferController::class)->except('show');
         Route::resource('coupons', CouponController::class)->except('show')->parameters(['coupons' => 'coupon']);
         Route::resource('shipping-methods', ShippingMethodController::class)->except('show')
             ->parameters(['shipping-methods' => 'shippingMethod']);

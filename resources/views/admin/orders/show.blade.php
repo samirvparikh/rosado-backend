@@ -25,6 +25,12 @@
                                         <p class="text-[11px] uppercase tracking-wider text-amber-600">Custom ROSADO Perfume</p>
                                         <p class="text-neutral-800">{{ $item->size_name }} · {{ $item->fragrance_name }}</p>
                                         <p class="text-neutral-500">{{ $item->bottle_name }} · {{ $item->cap_name }}</p>
+                                        @if ($item->label_line1 || $item->label_line2)
+                                            <p class="mt-2 rounded-md bg-neutral-50 px-3 py-2 text-xs text-neutral-700"><span class="font-medium uppercase tracking-wider text-neutral-500">Label text:</span> {{ $item->label_line1 }}@if ($item->label_line1 && $item->label_line2) / @endif{{ $item->label_line2 }}</p>
+                                        @endif
+                                        @if ($item->remarks)
+                                            <p class="mt-2 whitespace-pre-line rounded-md bg-amber-50 px-3 py-2 text-xs text-neutral-700"><span class="font-medium uppercase tracking-wider text-amber-700">Remarks:</span> {{ $item->remarks }}</p>
+                                        @endif
                                     @else
                                         <p class="text-neutral-800">{{ $item->product_name }}</p>
                                         <p class="text-neutral-500">{{ $item->size_name }}</p>

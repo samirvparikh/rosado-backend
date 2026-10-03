@@ -40,13 +40,27 @@ class CartController extends Controller
             'bottleId' => ['required', 'string'],
             'capId' => ['required', 'string'],
             'quantity' => ['required', 'integer'],
+            'remarks' => ['nullable', 'string', 'max:500'],
+            'labelLine1' => ['nullable', 'string', 'max:'.CartQuoteService::LABEL_LINE_MAX],
+            'labelLine2' => ['nullable', 'string', 'max:'.CartQuoteService::LABEL_LINE_MAX],
         ]);
 
         $result = $this->customPerfumeValidator->validate($data);
         $image = Bottle::where('id', $result['bottleId'])->value('image');
+        $remarks = CartQuoteService::cleanRemarks($data['remarks'] ?? null);
+        $labelLine1 = CartQuoteService::cleanLabelLine($data['labelLine1'] ?? null);
+        $labelLine2 = CartQuoteService::cleanLabelLine($data['labelLine2'] ?? null);
+
+        // Same configuration with different remarks/label text must stay a separate cart line.
+        $id = "CUSTOM-{$result['fragranceId']}-{$result['sizeId']}-{$result['bottleId']}-{$result['capId']}";
+        $personalisation = implode("
+", [$remarks ?? '', $labelLine1 ?? '', $labelLine2 ?? '']);
+        if (trim($personalisation) !== '') {
+            $id .= '-'.substr(md5($personalisation), 0, 8);
+        }
 
         return response()->json([
-            'id' => "CUSTOM-{$result['fragranceId']}-{$result['sizeId']}-{$result['bottleId']}-{$result['capId']}",
+            'id' => $id,
             'productType' => 'CUSTOM_PERFUME',
             'fragranceId' => $result['fragranceId'],
             'fragranceName' => $result['fragranceName'],
@@ -56,6 +70,9 @@ class CartController extends Controller
             'bottleName' => $result['bottleName'],
             'capId' => $result['capId'],
             'capName' => $result['capName'],
+            'remarks' => $remarks,
+            'labelLine1' => $labelLine1,
+            'labelLine2' => $labelLine2,
             'image' => $image,
             'quantity' => $result['quantity'],
             'basePrice' => $result['basePrice'],

@@ -14,8 +14,8 @@ class Product extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'id', 'sku', 'name', 'slug', 'product_type', 'short_description', 'description', 'brand',
-        'status', 'base_price', 'sale_price', 'cost_price', 'mrp', 'tax_rate', 'discount_type',
+        'id', 'sku', 'name', 'slug', 'product_type', 'short_description', 'description', 'brand', 'tags',
+        'status', 'in_stock', 'base_price', 'sale_price', 'cost_price', 'mrp', 'tax_rate', 'discount_type',
         'discount_value', 'rating', 'review_count', 'is_new_arrival', 'is_best_seller', 'is_featured',
         'is_limited_edition', 'is_trending', 'is_sale', 'fragrance_id',
     ];
@@ -37,6 +37,8 @@ class Product extends Model
             'is_limited_edition' => 'boolean',
             'is_trending' => 'boolean',
             'is_sale' => 'boolean',
+            'tags' => 'array',
+            'in_stock' => 'boolean',
         ];
     }
 
@@ -71,11 +73,39 @@ class Product extends Model
         return $image?->image_url;
     }
 
+    /** Ordered by gallery position, the image after the primary one -- shown on card hover. */
+    public function secondaryImageUrl(): ?string
+    {
+        $primary = $this->primaryImageUrl();
+
+        return $this->images->first(fn ($image) => $image->image_url !== $primary)?->image_url;
+    }
+
     public function fromPrice(): ?float
     {
         $prices = $this->sizes->where('status', 'ACTIVE')->pluck('selling_price');
 
         return $prices->isEmpty() ? null : (float) $prices->min();
+    }
+
+    /** Sold out when the admin switched In Stock off, or no active size has stock left. */
+    public function isSoldOut(): bool
+    {
+        return ! $this->in_stock || ! $this->sizes->contains(fn ($row) => $row->status === 'ACTIVE' && $row->stock > 0);
+    }
+
+    /** Cheapest purchasable size, falling back to the cheapest active one when everything is sold out. */
+    public function defaultSizeId(): string
+    {
+        $active = $this->sizes->where('status', 'ACTIVE')->sortBy('selling_price');
+
+        return ($active->firstWhere(fn ($row) => $row->stock > 0) ?? $active->first())?->size_id ?? '';
+    }
+
+    /** @return list<string> */
+    public function tagList(): array
+    {
+        return array_values(array_filter(array_map('trim', $this->tags ?? []), fn ($tag) => $tag !== ''));
     }
 
     public function badges(): array

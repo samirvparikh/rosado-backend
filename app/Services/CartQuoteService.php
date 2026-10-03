@@ -15,6 +15,8 @@ use App\Models\ShippingMethod;
  */
 class CartQuoteService
 {
+    public const LABEL_LINE_MAX = 24;
+
     public function __construct(
         private readonly ReadyMadePricer $readyMadePricer,
         private readonly CustomPerfumeValidator $customPerfumeValidator,
@@ -116,6 +118,9 @@ class CartQuoteService
                 'fragranceName' => $validated['fragranceName'],
                 'bottleName' => $validated['bottleName'],
                 'capName' => $validated['capName'],
+                'remarks' => self::cleanRemarks($item['remarks'] ?? null),
+                'labelLine1' => self::cleanLabelLine($item['labelLine1'] ?? null),
+                'labelLine2' => self::cleanLabelLine($item['labelLine2'] ?? null),
                 'quantity' => $validated['quantity'],
                 'basePrice' => $validated['basePrice'],
                 'bottlePrice' => $validated['bottlePrice'],
@@ -129,5 +134,29 @@ class CartQuoteService
         }
 
         throw new ApiException('Unknown cart item type.', 422, 'UNKNOWN_ENTITY');
+    }
+
+    /** Optional free-text customer remarks on a custom perfume: trimmed, capped, empty → null. */
+    public static function cleanRemarks(mixed $remarks): ?string
+    {
+        if (! is_string($remarks)) {
+            return null;
+        }
+
+        $remarks = mb_substr(trim($remarks), 0, 500);
+
+        return $remarks === '' ? null : $remarks;
+    }
+
+    /** One personalised line printed on the bottle label: single-line, trimmed, capped, empty → null. */
+    public static function cleanLabelLine(mixed $line): ?string
+    {
+        if (! is_string($line)) {
+            return null;
+        }
+
+        $line = mb_substr(trim(preg_replace('/\s+/u', ' ', $line)), 0, self::LABEL_LINE_MAX);
+
+        return $line === '' ? null : $line;
     }
 }

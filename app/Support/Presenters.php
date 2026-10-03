@@ -130,7 +130,10 @@ class Presenters
             'shortDescription' => $product->short_description,
             'description' => $product->description,
             'brand' => $product->brand,
+            'tags' => $product->tagList(),
             'status' => $product->status,
+            'inStock' => $product->in_stock,
+            'soldOut' => $product->isSoldOut(),
             'basePrice' => $product->base_price === null ? null : (float) $product->base_price,
             'salePrice' => $product->sale_price === null ? null : (float) $product->sale_price,
             'costPrice' => $product->cost_price === null ? null : (float) $product->cost_price,
@@ -149,14 +152,30 @@ class Presenters
         ];
     }
 
-    /** Expects images/sizes/classifications eager loaded on $product. */
+    /** Expects images/sizes.size/classifications eager loaded on $product. */
     public static function productListItem(Product $product): array
     {
+        $sizeOptions = $product->sizes
+            ->where('status', 'ACTIVE')
+            ->sortBy(fn ($row) => $row->size?->sort_order ?? 0)
+            ->map(fn ($row) => [
+                'sizeId' => $row->size_id,
+                'displayName' => $row->size?->display_name ?? $row->size_id,
+                'mrp' => (float) $row->mrp,
+                'sellingPrice' => (float) $row->selling_price,
+                // Admin's In Stock switch overrides per-size stock.
+                'inStock' => $product->in_stock && $row->stock > 0,
+            ])
+            ->values()
+            ->all();
+
         return [
             ...self::productBase($product),
             'primaryImage' => $product->primaryImageUrl() ?? '',
+            'secondaryImage' => $product->secondaryImageUrl(),
             'fromPrice' => $product->fromPrice() ?? 0,
-            'defaultSizeId' => $product->sizes->where('status', 'ACTIVE')->sortBy('selling_price')->first()->size_id ?? '',
+            'defaultSizeId' => $product->defaultSizeId(),
+            'sizeOptions' => $sizeOptions,
             'badges' => $product->badges(),
             'audienceIds' => $product->classificationIdsByGroup('AUDIENCE'),
             'familyNames' => $product->classifications->where('group', 'FRAGRANCE_FAMILY')->pluck('name')->values()->all(),
@@ -223,6 +242,9 @@ class Presenters
             'fragranceName' => $item->fragrance_name,
             'bottleName' => $item->bottle_name,
             'capName' => $item->cap_name,
+            'remarks' => $item->remarks,
+            'labelLine1' => $item->label_line1,
+            'labelLine2' => $item->label_line2,
             'quantity' => $item->quantity,
             'basePrice' => (float) $item->base_price,
             'bottlePrice' => (float) $item->bottle_price,
