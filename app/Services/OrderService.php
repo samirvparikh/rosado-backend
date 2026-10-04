@@ -8,6 +8,7 @@ use App\Models\CapInventory;
 use App\Models\Order;
 use App\Models\ProductSize;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 /**
  * Creates orders the way spec sections 21/22/23 require: server recalculates
@@ -42,6 +43,7 @@ class OrderService
 
             $order = Order::create([
                 'order_number' => 'PENDING',
+                'access_token' => Str::random(40),
                 'user_id' => $customer['userId'] ?? null,
                 'status' => 'PLACED',
                 'customer_full_name' => $customer['fullName'],

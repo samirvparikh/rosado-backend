@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\BottleController;
 use App\Http\Controllers\Admin\CapController;
@@ -47,6 +48,7 @@ Route::name('admin.')->group(function () {
         Route::patch('/orders/{order}', [OrderController::class, 'update'])->name('orders.update');
 
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
-        Route::patch('/users/{user}', [UserController::class, 'update'])->name('users.update');
+
+        Route::resource('admins', AdminUserController::class)->except('show');
     });
 });

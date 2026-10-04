@@ -41,7 +41,9 @@ class OrderController extends Controller
             $data['items'],
         );
 
-        return response()->json(Presenters::order($order), 201);
+        // The access key is returned once, to whoever placed the order, so the
+        // confirmation page works for guests too (see show()).
+        return response()->json([...Presenters::order($order), 'accessToken' => $order->access_token], 201);
     }
 
     /** GET /api/orders -- authenticated customer's order history. */
@@ -55,14 +57,28 @@ class OrderController extends Controller
         return response()->json($orders->map(fn ($o) => Presenters::order($o))->values());
     }
 
-    /** GET /api/orders/:id */
+    /**
+     * GET /api/orders/:id[?token=...] -- readable by the signed-in owner, or
+     * by anyone holding the order's access key (guest checkout confirmation).
+     * IDs are sequential, so the ID alone never grants access.
+     */
     public function show(Request $request, string $id): JsonResponse
     {
-        $order = Order::with('items')
-            ->where('id', $id)
-            ->where('user_id', $request->user()->id)
-            ->first();
+        $order = Order::with('items')->find($id);
+        $user = $request->user('sanctum');
+        $token = (string) $request->query('token', '');
 
-        return response()->json($order ? Presenters::order($order) : null);
+        $isOwner = $order && $user && $order->user_id === $user->id;
+        $hasKey = $order && $token !== '' && $order->access_token && hash_equals($order->access_token, $token);
+
+        if (! $isOwner && ! $hasKey) {
+            // Same answer whether the order is missing or not theirs -- don't confirm IDs exist.
+            return response()->json([
+                'message' => $user ? 'This order could not be found.' : 'Please sign in to view this order.',
+                'code' => $user ? 'NOT_FOUND' : 'UNAUTHENTICATED',
+            ], $user ? 404 : 401);
+        }
+
+        return response()->json(Presenters::order($order));
     }
 }

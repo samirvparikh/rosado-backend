@@ -67,13 +67,14 @@ Route::post('/cart/quote', [CartController::class, 'quote']);
 
 // Orders -- guest checkout allowed; linked to the account when a token is sent.
 Route::post('/orders', [OrderController::class, 'store']);
+// Owner (Bearer token) or order access key (?token=) -- checked in the controller.
+Route::get('/orders/{id}', [OrderController::class, 'show'])->whereNumber('id');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/auth/me', [AuthController::class, 'me']);
 
     Route::get('/orders', [OrderController::class, 'index']);
-    Route::get('/orders/{id}', [OrderController::class, 'show']);
 
     Route::get('/addresses', [AddressController::class, 'index']);
     Route::post('/addresses', [AddressController::class, 'store']);

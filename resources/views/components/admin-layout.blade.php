@@ -40,6 +40,7 @@
                     ],
                     'People' => [
                         ['label' => 'Customers', 'route' => 'admin.users.index', 'pattern' => 'admin.users.*'],
+                        ['label' => 'Admin Users', 'route' => 'admin.admins.index', 'pattern' => 'admin.admins.*'],
                     ],
                 ];
             @endphp

@@ -8,8 +8,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Order extends Model
 {
+    /** Secret key for viewing the order without signing in -- never serialised. */
+    protected $hidden = ['access_token'];
+
     protected $fillable = [
-        'order_number', 'user_id', 'status', 'customer_full_name', 'customer_mobile', 'customer_email',
+        'order_number', 'access_token', 'user_id', 'status', 'customer_full_name', 'customer_mobile', 'customer_email',
         'customer_address', 'customer_city', 'customer_state', 'customer_pincode', 'shipping_method_id',
         'shipping_method_label', 'payment_method', 'coupon_code', 'subtotal', 'discount', 'tax',
         'shipping', 'final_price',
