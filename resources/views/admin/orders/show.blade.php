@@ -48,8 +48,14 @@
                                             </div>
                                         </div>
                                     @else
-                                        <p class="text-neutral-800">{{ $item->product_name }}</p>
-                                        <p class="text-neutral-500">{{ $item->size_name }}</p>
+                                        <div class="flex items-center gap-4">
+                                            <x-admin.order-item-thumb :item="$item" large />
+                                            <div>
+                                                <p class="text-[11px] uppercase tracking-wider text-neutral-400">Ready made</p>
+                                                <p class="font-medium text-neutral-900">{{ $item->product_name }}</p>
+                                                <p class="text-neutral-500">{{ $item->size_name }}</p>
+                                            </div>
+                                        </div>
                                     @endif
                                 </td>
                                 <td class="px-5 py-3 text-neutral-600">{{ $item->quantity }}</td>

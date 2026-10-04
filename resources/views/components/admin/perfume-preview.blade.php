@@ -1,7 +1,7 @@
 @props(['preview' => null])
 {{-- Renders a CustomizerLayers::compose() snapshot: the exact layer stack the customer saw. --}}
 @if (is_array($preview) && ! empty($preview['layers']))
-    <div {{ $attributes->merge(['class' => 'relative w-full overflow-hidden rounded-lg bg-gradient-to-b from-stone-100 to-white']) }}
+    <div {{ $attributes->merge(['class' => 'relative overflow-hidden rounded-lg bg-gradient-to-b from-stone-100 to-white']) }}
          style="aspect-ratio: {{ $preview['aspect'] ?? '3 / 4' }}; container-type: inline-size;">
         @foreach ($preview['layers'] as $layer)
             <img src="{{ \App\Support\CustomizerLayers::assetUrl($layer['image']) }}" alt="{{ strtolower($layer['type']) }}"

@@ -19,6 +19,7 @@
             <thead>
                 <tr class="border-b border-neutral-100 bg-neutral-50 text-left text-xs uppercase tracking-wider text-neutral-500">
                     <th class="px-5 py-3">Order</th>
+                    <th class="px-5 py-3">Products</th>
                     <th class="px-5 py-3">Customer</th>
                     <th class="px-5 py-3">Placed</th>
                     <th class="px-5 py-3">Status</th>
@@ -29,6 +30,28 @@
                 @forelse ($orders as $order)
                     <tr class="cursor-pointer border-b border-neutral-50 last:border-0 hover:bg-neutral-50" onclick="window.location='{{ route('admin.orders.show', $order) }}'">
                         <td class="px-5 py-3 font-medium text-neutral-800">{{ $order->order_number }}</td>
+                        <td class="px-5 py-2.5">
+                            <div class="flex items-center gap-3">
+                                <div class="flex -space-x-2">
+                                    @foreach ($order->items->take(3) as $item)
+                                        <x-admin.order-item-thumb :item="$item" class="ring-2 ring-white" />
+                                    @endforeach
+                                    @if ($order->items->count() > 3)
+                                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-md border border-neutral-200 bg-neutral-100 text-xs font-medium text-neutral-600 ring-2 ring-white">+{{ $order->items->count() - 3 }}</div>
+                                    @endif
+                                </div>
+                                <div class="min-w-0 max-w-[220px] text-xs">
+                                    <p class="truncate text-neutral-800">{{ $order->items->first()?->product_name }}</p>
+                                    <p class="truncate text-neutral-400">
+                                        @if ($order->items->count() > 1)
+                                            + {{ $order->items->count() - 1 }} more item{{ $order->items->count() > 2 ? 's' : '' }}
+                                        @else
+                                            {{ $order->items->first()?->size_name }}{{ $order->items->first()?->fragrance_name ? ' · '.$order->items->first()->fragrance_name : '' }}
+                                        @endif
+                                    </p>
+                                </div>
+                            </div>
+                        </td>
                         <td class="px-5 py-3 text-neutral-600">{{ $order->customer_full_name }}</td>
                         <td class="px-5 py-3 text-neutral-500">{{ $order->created_at->format('d M Y, H:i') }}</td>
                         <td class="px-5 py-3">
@@ -37,7 +60,7 @@
                         <td class="px-5 py-3 text-right text-neutral-800">₹{{ number_format($order->final_price, 2) }}</td>
                     </tr>
                 @empty
-                    <tr><td colspan="5" class="px-5 py-8 text-center text-neutral-400">No orders found.</td></tr>
+                    <tr><td colspan="6" class="px-5 py-8 text-center text-neutral-400">No orders found.</td></tr>
                 @endforelse
             </tbody>
         </table>

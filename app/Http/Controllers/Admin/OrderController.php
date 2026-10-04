@@ -13,6 +13,7 @@ class OrderController extends Controller
     public function index(Request $request): View
     {
         $orders = Order::query()
+            ->with('items') // product thumbnails in the list
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')))
             ->when($request->filled('search'), function ($q) use ($request) {
                 $term = $request->string('search');
