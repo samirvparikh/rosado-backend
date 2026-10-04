@@ -9,6 +9,8 @@ use App\Models\FragranceNote;
 use App\Models\FragranceSizePrice;
 use App\Models\Note;
 use App\Models\Size;
+use App\Support\CustomizerLayers;
+use App\Support\ImageUpload;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -124,6 +126,11 @@ class FragranceController extends Controller
             'description' => ['required', 'string'],
             'gender' => ['required', 'in:MEN,WOMEN,UNISEX'],
             'image' => ['nullable', 'string', 'max:500'],
+            'image_file' => ['nullable', ...ImageUpload::RULES],
+            'liquid_image' => ['nullable', 'string', 'max:500'],
+            'liquid_image_file' => ['nullable', ...ImageUpload::LAYER_RULES],
+            'remove_liquid_image' => ['sometimes'],
+            ...CustomizerLayers::rules(),
             'status' => ['required', 'in:ACTIVE,INACTIVE'],
             'families' => ['array'],
             'characters' => ['array'],
@@ -141,9 +148,20 @@ class FragranceController extends Controller
 
         $validated = $request->validate($rules);
 
+        if ($request->hasFile('image_file')) {
+            $validated['image'] = ImageUpload::store($request->file('image_file'), 'fragrances');
+        }
+        if ($request->hasFile('liquid_image_file')) {
+            $validated['liquid_image'] = ImageUpload::store($request->file('liquid_image_file'), 'fragrances');
+        }
+        if ($request->boolean('remove_liquid_image')) {
+            $validated['liquid_image'] = null;
+        }
+
         return [
             'fragrance' => collect($validated)->only([
-                'id', 'name', 'slug', 'short_description', 'description', 'gender', 'image', 'status',
+                'id', 'name', 'slug', 'short_description', 'description', 'gender', 'image', 'liquid_image',
+                'layer_top', 'layer_left', 'layer_width', 'layer_z', 'status',
             ])->all(),
             'familyIds' => $validated['families'] ?? [],
             'characterIds' => $validated['characters'] ?? [],

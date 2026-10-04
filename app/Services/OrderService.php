@@ -68,6 +68,11 @@ class OrderService
             foreach ($quote['lines'] as $line) {
                 $order->items()->create([
                     'product_type' => $line['productType'],
+                    'product_id' => $line['productId'] ?? null,
+                    'size_id' => $line['sizeId'] ?? null,
+                    'fragrance_id' => $line['fragranceId'] ?? null,
+                    'bottle_id' => $line['bottleId'] ?? null,
+                    'cap_id' => $line['capId'] ?? null,
                     'product_name' => $line['productName'],
                     'size_name' => $line['sizeName'],
                     'fragrance_name' => $line['fragranceName'],
@@ -78,6 +83,9 @@ class OrderService
                     'label_line2' => $line['labelLine2'] ?? null,
                     'quantity' => $line['quantity'],
                     'base_price' => $line['basePrice'],
+                    'fragrance_price' => $line['fragrancePrice'] ?? 0,
+                    'customization_price' => $line['customizationPrice'] ?? 0,
+                    'preview' => $line['preview'] ?? null,
                     'bottle_price' => $line['bottlePrice'],
                     'cap_price' => $line['capPrice'],
                     'discount' => $line['discount'],

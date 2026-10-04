@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Bottle;
+use App\Models\Cap;
 use App\Models\Classification;
 use App\Models\Fragrance;
 use App\Models\Product;
+use App\Models\ProductCustomizerOption;
 use App\Models\ProductImage;
 use App\Models\ProductSize;
 use App\Models\Size;
@@ -57,7 +60,7 @@ class ProductController extends Controller
 
     public function edit(Product $product): View
     {
-        $product->load(['images', 'sizes', 'classifications']);
+        $product->load(['images', 'sizes', 'classifications', 'customizerOptions']);
 
         return view('admin.products.form', ['product' => $product, ...$this->formData()]);
     }
@@ -89,12 +92,24 @@ class ProductController extends Controller
             'sizes' => Size::orderBy('sort_order')->get(),
             'fragrances' => Fragrance::orderBy('name')->pluck('name', 'id'),
             'imageSlots' => self::IMAGE_SLOTS,
+            'customizerChoices' => [
+                'FRAGRANCE' => ['label' => 'Fragrances', 'items' => Fragrance::orderBy('name')->get(['id', 'name', 'status'])],
+                'BOTTLE' => ['label' => 'Bottles', 'items' => Bottle::with('size')->orderBy('size_id')->orderBy('sort_order')->get()],
+                'CAP' => ['label' => 'Caps', 'items' => Cap::orderBy('sort_order')->get(['id', 'name', 'status'])],
+            ],
         ];
     }
 
     private function syncRelations(Product $product, array $data): void
     {
         $product->classifications()->sync($data['classificationIds']);
+
+        ProductCustomizerOption::where('product_id', $product->id)->delete();
+        foreach ($data['customizer'] as $type => $ids) {
+            foreach (array_unique($ids) as $id) {
+                ProductCustomizerOption::create(['product_id' => $product->id, 'option_type' => $type, 'option_id' => $id]);
+            }
+        }
 
         foreach ($data['sizes'] as $sizeId => $row) {
             if (empty($row['sku'])) {
@@ -161,6 +176,13 @@ class ProductController extends Controller
             'is_trending' => ['sometimes', 'boolean'],
             'is_sale' => ['sometimes', 'boolean'],
             'classifications' => ['array'],
+            'customizer' => ['array'],
+            'customizer.FRAGRANCE' => ['array'],
+            'customizer.FRAGRANCE.*' => ['string', 'exists:fragrances,id'],
+            'customizer.BOTTLE' => ['array'],
+            'customizer.BOTTLE.*' => ['string', 'exists:bottles,id'],
+            'customizer.CAP' => ['array'],
+            'customizer.CAP.*' => ['string', 'exists:caps,id'],
             'sizes' => ['array'],
             'sizes.*.sku' => ['nullable', 'string', 'max:60'],
             'sizes.*.mrp' => ['nullable', 'numeric', 'min:0'],
@@ -207,6 +229,10 @@ class ProductController extends Controller
         return [
             'product' => $product,
             'classificationIds' => $validated['classifications'] ?? [],
+            // Only custom perfumes offer customizer components.
+            'customizer' => $product['product_type'] === 'CUSTOM_PERFUME'
+                ? array_intersect_key($validated['customizer'] ?? [], array_flip(ProductCustomizerOption::TYPES))
+                : [],
             'sizes' => $validated['sizes'] ?? [],
             // Validated keys follow rule order, not slot order -- restore slot order.
             'images' => collect($validated['images'] ?? [])->sortKeys()->values()->all(),

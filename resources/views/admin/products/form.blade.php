@@ -2,6 +2,7 @@
     $selectedClassificationIds = $product?->classifications->pluck('id')->all() ?? [];
     $sizeRow = fn (string $sizeId) => $product?->sizes->firstWhere('size_id', $sizeId);
     $imageAt = fn (int $i) => $product?->images->values()->get($i);
+    $customizerSelected = fn (string $type) => old("customizer.$type", $product?->customizerOptions->where('option_type', $type)->pluck('option_id')->all() ?? []);
     $flags = ['is_new_arrival' => 'New Arrival', 'is_best_seller' => 'Best Seller', 'is_featured' => 'Featured', 'is_limited_edition' => 'Limited Edition', 'is_trending' => 'Trending', 'is_sale' => 'Sale'];
 @endphp
 <x-admin-layout :title="$product ? 'Edit Product' : 'New Product'">
@@ -83,9 +84,31 @@
                 </div>
             </section>
 
+            <section data-customizer-section @class(['hidden' => ($product?->product_type ?? old('product_type')) !== 'CUSTOM_PERFUME'])>
+                <p class="text-xs font-medium uppercase tracking-wider text-neutral-500">Customizer Options</p>
+                <p class="text-xs text-neutral-400">What customers can pick for this perfume. Leave a group with nothing ticked to offer every active option. Base price per size is set under Sizes &amp; Pricing below (Selling Price); fragrance, bottle and cap prices are added on top.</p>
+                <div class="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    @foreach ($customizerChoices as $type => $group)
+                        <div class="rounded-md border border-neutral-200 p-3">
+                            <p class="text-xs font-medium text-neutral-600">{{ $group['label'] }}</p>
+                            <div class="mt-1.5 max-h-48 space-y-1 overflow-y-auto">
+                                @foreach ($group['items'] as $item)
+                                    <label class="flex items-center gap-2 text-xs text-neutral-700">
+                                        <input type="checkbox" name="customizer[{{ $type }}][]" value="{{ $item->id }}" @checked(in_array($item->id, $customizerSelected($type))) class="rounded border-neutral-300">
+                                        {{ $item->name }}
+                                        @if ($type === 'BOTTLE')<span class="text-neutral-400">· {{ $item->size?->display_name }}</span>@endif
+                                        @if ($item->status !== 'ACTIVE')<span class="text-neutral-400">(inactive)</span>@endif
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </section>
+
             <section>
                 <p class="text-xs font-medium uppercase tracking-wider text-neutral-500">Sizes &amp; Pricing</p>
-                <p class="text-xs text-neutral-400">Leave a size's SKU blank to remove it from this product.</p>
+                <p class="text-xs text-neutral-400">Leave a size's SKU blank to remove it from this product. For a Custom Perfume, the Selling Price is the base price of that size.</p>
                 <div class="mt-2 space-y-3">
                     @foreach ($sizes as $size)
                         @php $row = $sizeRow($size->id); @endphp
@@ -153,4 +176,15 @@
             </div>
         </form>
     </div>
+    <script>
+        // Customizer options only apply to Custom Perfume products.
+        (function () {
+            const type = document.getElementById('product_type');
+            const section = document.querySelector('[data-customizer-section]');
+            if (!type || !section) return;
+            const sync = () => section.classList.toggle('hidden', type.value !== 'CUSTOM_PERFUME');
+            type.addEventListener('change', sync);
+            sync();
+        })();
+    </script>
 </x-admin-layout>

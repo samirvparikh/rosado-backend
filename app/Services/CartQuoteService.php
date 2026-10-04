@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Exceptions\ApiException;
-use App\Models\Bottle;
+use App\Support\CustomizerLayers;
 use App\Models\Coupon;
 use App\Models\ShippingMethod;
 
@@ -83,7 +83,9 @@ class CartQuoteService
 
             return [
                 'productType' => 'READY_MADE',
+                'productId' => $priced['productId'],
                 'productName' => $priced['productName'],
+                'sizeId' => $priced['sizeId'],
                 'sizeName' => $priced['sizeName'],
                 'fragranceName' => null,
                 'bottleName' => null,
@@ -102,6 +104,7 @@ class CartQuoteService
 
         if ($productType === 'CUSTOM_PERFUME') {
             $validated = $this->customPerfumeValidator->validate([
+                'productId' => $item['productId'] ?? null,
                 'fragranceId' => $item['fragranceId'] ?? null,
                 'sizeId' => $item['sizeId'] ?? null,
                 'bottleId' => $item['bottleId'] ?? null,
@@ -109,27 +112,37 @@ class CartQuoteService
                 'quantity' => $quantity,
             ]);
 
-            $bottleImage = Bottle::where('id', $validated['bottleId'])->value('image');
+            ['bottle' => $bottle, 'cap' => $cap, 'fragrance' => $fragrance] = $validated['models'];
+            $labelLine1 = self::cleanLabelLine($item['labelLine1'] ?? null);
+            $labelLine2 = self::cleanLabelLine($item['labelLine2'] ?? null);
 
             return [
                 'productType' => 'CUSTOM_PERFUME',
-                'productName' => 'CUSTOM ROSADO PERFUME',
+                'productId' => $validated['productId'],
+                'productName' => $validated['productName'],
+                'sizeId' => $validated['sizeId'],
                 'sizeName' => $validated['sizeName'],
+                'fragranceId' => $validated['fragranceId'],
                 'fragranceName' => $validated['fragranceName'],
+                'bottleId' => $validated['bottleId'],
                 'bottleName' => $validated['bottleName'],
+                'capId' => $validated['capId'],
                 'capName' => $validated['capName'],
                 'remarks' => self::cleanRemarks($item['remarks'] ?? null),
-                'labelLine1' => self::cleanLabelLine($item['labelLine1'] ?? null),
-                'labelLine2' => self::cleanLabelLine($item['labelLine2'] ?? null),
+                'labelLine1' => $labelLine1,
+                'labelLine2' => $labelLine2,
                 'quantity' => $validated['quantity'],
                 'basePrice' => $validated['basePrice'],
+                'fragrancePrice' => $validated['fragrancePrice'],
                 'bottlePrice' => $validated['bottlePrice'],
                 'capPrice' => $validated['capPrice'],
+                'customizationPrice' => $validated['customizationPrice'],
                 'discount' => 0,
                 'tax' => round($validated['lineTotal'] * 18 / 118),
                 'finalPrice' => $validated['lineTotal'],
                 'lineTotal' => $validated['lineTotal'],
-                'image' => $bottleImage,
+                'image' => $bottle->image,
+                'preview' => CustomizerLayers::compose($bottle, $cap, $fragrance, $validated['sizeName'], [$labelLine1, $labelLine2]),
             ];
         }
 

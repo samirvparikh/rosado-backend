@@ -13,8 +13,19 @@ class Fragrance extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'id', 'name', 'slug', 'short_description', 'description', 'gender', 'image', 'status',
+        'id', 'name', 'slug', 'short_description', 'description', 'gender', 'image', 'liquid_image',
+        'layer_top', 'layer_left', 'layer_width', 'layer_z', 'status',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'layer_top' => 'float',
+            'layer_left' => 'float',
+            'layer_width' => 'float',
+            'layer_z' => 'integer',
+        ];
+    }
 
     /** @return HasMany<FragranceNote, $this> */
     public function noteLinks(): HasMany

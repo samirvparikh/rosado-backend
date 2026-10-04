@@ -11,9 +11,9 @@ class CapSeeder extends Seeder
     public function run(): void
     {
         $caps = [
-            ['CAP001', 'Classic Black', '/images/caps/cap-classic-black.svg', 0, 80, 1],
-            ['CAP002', 'Premium Gold', '/images/caps/cap-premium-gold.svg', 50, 42, 2],
-            ['CAP003', 'Modern Silver', '/images/caps/cap-modern-silver.svg', 30, 50, 3],
+            ['CAP001', 'Classic Black', '/images/caps/cap-classic-black.png', 0, 80, 1],
+            ['CAP002', 'Premium Gold', '/images/caps/cap-premium-gold.png', 50, 42, 2],
+            ['CAP003', 'Modern Silver', '/images/caps/cap-modern-silver.png', 30, 50, 3],
         ];
 
         foreach ($caps as [$id, $name, $image, $additionalPrice, $stock, $sortOrder]) {

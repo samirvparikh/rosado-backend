@@ -26,6 +26,7 @@
                         ['label' => 'Fragrances', 'route' => 'admin.fragrances.index', 'pattern' => 'admin.fragrances.*'],
                         ['label' => 'Bottles', 'route' => 'admin.bottles.index', 'pattern' => 'admin.bottles.*'],
                         ['label' => 'Caps', 'route' => 'admin.caps.index', 'pattern' => 'admin.caps.*'],
+                        ['label' => 'Alignment Tool', 'route' => 'admin.customizer.alignment', 'pattern' => 'admin.customizer.*'],
                         ['label' => 'Sizes', 'route' => 'admin.sizes.index', 'pattern' => 'admin.sizes.*'],
                         ['label' => 'Classifications', 'route' => 'admin.classifications.index', 'pattern' => 'admin.classifications.*'],
                     ],

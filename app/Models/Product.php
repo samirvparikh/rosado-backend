@@ -60,6 +60,12 @@ class Product extends Model
         return $this->belongsToMany(Classification::class, 'product_classifications');
     }
 
+    /** @return HasMany<ProductCustomizerOption, $this> */
+    public function customizerOptions(): HasMany
+    {
+        return $this->hasMany(ProductCustomizerOption::class);
+    }
+
     /** @return BelongsTo<Fragrance, $this> */
     public function fragrance(): BelongsTo
     {

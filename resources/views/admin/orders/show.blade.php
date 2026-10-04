@@ -22,15 +22,31 @@
                             <tr class="border-b border-neutral-50 last:border-0">
                                 <td class="px-5 py-3">
                                     @if ($item->product_type === 'CUSTOM_PERFUME')
-                                        <p class="text-[11px] uppercase tracking-wider text-amber-600">Custom ROSADO Perfume</p>
-                                        <p class="text-neutral-800">{{ $item->size_name }} · {{ $item->fragrance_name }}</p>
-                                        <p class="text-neutral-500">{{ $item->bottle_name }} · {{ $item->cap_name }}</p>
-                                        @if ($item->label_line1 || $item->label_line2)
-                                            <p class="mt-2 rounded-md bg-neutral-50 px-3 py-2 text-xs text-neutral-700"><span class="font-medium uppercase tracking-wider text-neutral-500">Label text:</span> {{ $item->label_line1 }}@if ($item->label_line1 && $item->label_line2) / @endif{{ $item->label_line2 }}</p>
-                                        @endif
-                                        @if ($item->remarks)
-                                            <p class="mt-2 whitespace-pre-line rounded-md bg-amber-50 px-3 py-2 text-xs text-neutral-700"><span class="font-medium uppercase tracking-wider text-amber-700">Remarks:</span> {{ $item->remarks }}</p>
-                                        @endif
+                                        <div class="flex gap-4">
+                                            @if ($item->preview)
+                                                <x-admin.perfume-preview :preview="$item->preview" class="w-28 shrink-0 sm:w-36" />
+                                            @endif
+                                            <div class="min-w-0 flex-1">
+                                                <p class="text-[11px] uppercase tracking-wider text-amber-600">Custom Perfume</p>
+                                                <p class="font-medium text-neutral-900">{{ $item->product_name }}</p>
+                                                <dl class="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs">
+                                                    <dt class="text-neutral-500">Size</dt><dd class="text-neutral-800">{{ $item->size_name }}</dd>
+                                                    <dt class="text-neutral-500">Fragrance</dt><dd class="text-neutral-800">{{ $item->fragrance_name }}@if ($item->fragrance_id) <span class="text-neutral-400">({{ $item->fragrance_id }})</span>@endif</dd>
+                                                    <dt class="text-neutral-500">Bottle</dt><dd class="text-neutral-800">{{ $item->bottle_name }}@if ($item->bottle_id) <span class="text-neutral-400">({{ $item->bottle_id }})</span>@endif</dd>
+                                                    <dt class="text-neutral-500">Cap</dt><dd class="text-neutral-800">{{ $item->cap_name }}@if ($item->cap_id) <span class="text-neutral-400">({{ $item->cap_id }})</span>@endif</dd>
+                                                    @if ((float) $item->customization_price > 0)
+                                                        <dt class="text-neutral-500">Base</dt><dd class="text-neutral-800">₹{{ number_format($item->base_price, 2) }}</dd>
+                                                        <dt class="text-neutral-500">Customization</dt><dd class="text-neutral-800">₹{{ number_format($item->customization_price, 2) }} <span class="text-neutral-400">(fragrance ₹{{ number_format($item->fragrance_price, 2) }} · bottle ₹{{ number_format($item->bottle_price, 2) }} · cap ₹{{ number_format($item->cap_price, 2) }})</span></dd>
+                                                    @endif
+                                                </dl>
+                                                @if ($item->label_line1 || $item->label_line2)
+                                                    <p class="mt-2 rounded-md bg-neutral-50 px-3 py-2 text-xs text-neutral-700"><span class="font-medium uppercase tracking-wider text-neutral-500">Label text:</span> {{ $item->label_line1 }}@if ($item->label_line1 && $item->label_line2) / @endif{{ $item->label_line2 }}</p>
+                                                @endif
+                                                @if ($item->remarks)
+                                                    <p class="mt-2 whitespace-pre-line rounded-md bg-amber-50 px-3 py-2 text-xs text-neutral-700"><span class="font-medium uppercase tracking-wider text-amber-700">Remarks:</span> {{ $item->remarks }}</p>
+                                                @endif
+                                            </div>
+                                        </div>
                                     @else
                                         <p class="text-neutral-800">{{ $item->product_name }}</p>
                                         <p class="text-neutral-500">{{ $item->size_name }}</p>

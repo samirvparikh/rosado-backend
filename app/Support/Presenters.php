@@ -237,7 +237,12 @@ class Presenters
     {
         return [
             'productType' => $item->product_type,
+            'productId' => $item->product_id,
             'productName' => $item->product_name,
+            'sizeId' => $item->size_id,
+            'fragranceId' => $item->fragrance_id,
+            'bottleId' => $item->bottle_id,
+            'capId' => $item->cap_id,
             'sizeName' => $item->size_name,
             'fragranceName' => $item->fragrance_name,
             'bottleName' => $item->bottle_name,
@@ -247,6 +252,9 @@ class Presenters
             'labelLine2' => $item->label_line2,
             'quantity' => $item->quantity,
             'basePrice' => (float) $item->base_price,
+            'fragrancePrice' => (float) $item->fragrance_price,
+            'customizationPrice' => (float) $item->customization_price,
+            'preview' => $item->preview,
             'bottlePrice' => (float) $item->bottle_price,
             'capPrice' => (float) $item->cap_price,
             'discount' => (float) $item->discount,

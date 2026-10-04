@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
-use App\Models\Bottle;
 use App\Services\CartQuoteService;
 use App\Services\CustomPerfumeValidator;
 use App\Services\ReadyMadePricer;
+use App\Support\CustomizerLayers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -35,6 +35,7 @@ class CartController extends Controller
     public function priceCustom(Request $request): JsonResponse
     {
         $data = $request->validate([
+            'productId' => ['nullable', 'string'],
             'fragranceId' => ['required', 'string'],
             'sizeId' => ['required', 'string'],
             'bottleId' => ['required', 'string'],
@@ -46,13 +47,13 @@ class CartController extends Controller
         ]);
 
         $result = $this->customPerfumeValidator->validate($data);
-        $image = Bottle::where('id', $result['bottleId'])->value('image');
         $remarks = CartQuoteService::cleanRemarks($data['remarks'] ?? null);
         $labelLine1 = CartQuoteService::cleanLabelLine($data['labelLine1'] ?? null);
         $labelLine2 = CartQuoteService::cleanLabelLine($data['labelLine2'] ?? null);
 
         // Same configuration with different remarks/label text must stay a separate cart line.
-        $id = "CUSTOM-{$result['fragranceId']}-{$result['sizeId']}-{$result['bottleId']}-{$result['capId']}";
+        $id = 'CUSTOM-'.($result['productId'] ? "{$result['productId']}-" : '')
+            ."{$result['fragranceId']}-{$result['sizeId']}-{$result['bottleId']}-{$result['capId']}";
         $personalisation = implode("
 ", [$remarks ?? '', $labelLine1 ?? '', $labelLine2 ?? '']);
         if (trim($personalisation) !== '') {
@@ -62,6 +63,8 @@ class CartController extends Controller
         return response()->json([
             'id' => $id,
             'productType' => 'CUSTOM_PERFUME',
+            'productId' => $result['productId'],
+            'productName' => $result['productName'],
             'fragranceId' => $result['fragranceId'],
             'fragranceName' => $result['fragranceName'],
             'sizeId' => $result['sizeId'],
@@ -73,11 +76,18 @@ class CartController extends Controller
             'remarks' => $remarks,
             'labelLine1' => $labelLine1,
             'labelLine2' => $labelLine2,
-            'image' => $image,
+            'image' => $result['models']['bottle']->image,
+            // Layer stack for the cart thumbnail -- display only; the IDs above are what's re-priced.
+            'preview' => CustomizerLayers::compose(
+                $result['models']['bottle'], $result['models']['cap'], $result['models']['fragrance'],
+                $result['sizeName'], [$labelLine1, $labelLine2],
+            ),
             'quantity' => $result['quantity'],
             'basePrice' => $result['basePrice'],
+            'fragrancePrice' => $result['fragrancePrice'],
             'bottlePrice' => $result['bottlePrice'],
             'capPrice' => $result['capPrice'],
+            'customizationPrice' => $result['customizationPrice'],
             'unitPrice' => $result['unitPrice'],
             'lineTotal' => $result['lineTotal'],
         ]);

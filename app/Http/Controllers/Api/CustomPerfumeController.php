@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Services\CustomPerfumeValidator;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 
 class CustomPerfumeController extends Controller
@@ -15,6 +16,7 @@ class CustomPerfumeController extends Controller
     public function validateConfiguration(Request $request): JsonResponse
     {
         $data = $request->validate([
+            'productId' => ['nullable', 'string'],
             'fragranceId' => ['required', 'string'],
             'sizeId' => ['required', 'string'],
             'bottleId' => ['required', 'string'],
@@ -22,15 +24,14 @@ class CustomPerfumeController extends Controller
             'quantity' => ['required', 'integer'],
         ]);
 
-        $result = $this->validator->validate($data);
-
-        return response()->json($result);
+        return response()->json(Arr::except($this->validator->validate($data), 'models'));
     }
 
     /** POST /api/custom-perfume/price -- live price preview while building. */
     public function price(Request $request): JsonResponse
     {
         $data = $request->validate([
+            'productId' => ['nullable', 'string'],
             'fragranceId' => ['nullable', 'string'],
             'sizeId' => ['nullable', 'string'],
             'bottleId' => ['nullable', 'string'],

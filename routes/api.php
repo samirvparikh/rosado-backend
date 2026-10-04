@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\CapController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\ClassificationController;
 use App\Http\Controllers\Api\CustomPerfumeController;
+use App\Http\Controllers\Api\CustomizerController;
 use App\Http\Controllers\Api\FragranceController;
 use App\Http\Controllers\Api\OfferController;
 use App\Http\Controllers\Api\OrderController;
@@ -55,6 +56,7 @@ Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{slug}', [ProductController::class, 'show']);
 
 // Custom Perfume Builder -- backend is the pricing/compatibility authority (Rules 13-17).
+Route::get('/perfume-customizer/{product?}', [CustomizerController::class, 'show']);
 Route::post('/custom-perfume/validate', [CustomPerfumeController::class, 'validateConfiguration']);
 Route::post('/custom-perfume/price', [CustomPerfumeController::class, 'price']);
 

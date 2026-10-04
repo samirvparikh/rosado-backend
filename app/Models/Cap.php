@@ -12,7 +12,7 @@ class Cap extends Model
 
     protected $keyType = 'string';
 
-    protected $fillable = ['id', 'name', 'code', 'image', 'additional_price', 'stock', 'status', 'sort_order'];
+    protected $fillable = ['id', 'name', 'code', 'image', 'layer_top', 'layer_left', 'layer_width', 'layer_z', 'additional_price', 'stock', 'status', 'sort_order'];
 
     protected function casts(): array
     {
@@ -20,6 +20,10 @@ class Cap extends Model
             'additional_price' => 'decimal:2',
             'stock' => 'integer',
             'sort_order' => 'integer',
+            'layer_top' => 'float',
+            'layer_left' => 'float',
+            'layer_width' => 'float',
+            'layer_z' => 'integer',
         ];
     }
 

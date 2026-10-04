@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Bottle;
 use App\Models\BottleInventory;
+use App\Models\Cap;
 use App\Models\Size;
+use App\Support\CustomizerLayers;
 use App\Support\ImageUpload;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -24,7 +26,7 @@ class BottleController extends Controller
     {
         $sizes = Size::orderBy('sort_order')->pluck('display_name', 'id');
 
-        return view('admin.bottles.form', ['bottle' => null, 'sizes' => $sizes]);
+        return view('admin.bottles.form', ['bottle' => null, 'sizes' => $sizes, 'canvasRefs' => $this->capRefs(null)]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -47,8 +49,9 @@ class BottleController extends Controller
     public function edit(Bottle $bottle): View
     {
         $sizes = Size::orderBy('sort_order')->pluck('display_name', 'id');
+        $bottle->load('layerOverrides');
 
-        return view('admin.bottles.form', compact('bottle', 'sizes'));
+        return view('admin.bottles.form', ['bottle' => $bottle, 'sizes' => $sizes, 'canvasRefs' => $this->capRefs($bottle)]);
     }
 
     public function update(Request $request, Bottle $bottle): RedirectResponse
@@ -72,18 +75,36 @@ class BottleController extends Controller
         return redirect()->route('admin.bottles.index')->with('status', 'Bottle deleted.');
     }
 
+    /** Caps to preview on this bottle, each at its fit for this bottle (or its default). */
+    private function capRefs(?Bottle $bottle): array
+    {
+        return Cap::where('status', 'ACTIVE')->whereNotNull('image')->orderBy('sort_order')->get()
+            ->map(fn (Cap $cap) => [
+                'name' => $cap->name,
+                'image' => $cap->image,
+                'box' => CustomizerLayers::capLayer($cap, $bottle) ?? CustomizerLayers::box($cap),
+                'note' => $bottle?->layerOverrides->contains(fn ($o) => $o->layer_type === 'CAP' && $o->layer_id === $cap->id)
+                    ? null
+                    : 'Cap shown at its default position. After saving, fit it to this bottle in the Alignment Tool.',
+            ])
+            ->values()
+            ->all();
+    }
+
     private function validated(Request $request, bool $isCreate): array
     {
         $rules = [
             'name' => ['required', 'string', 'max:150'],
             'code' => ['required', 'string', 'max:50', 'unique:bottles,code'.($isCreate ? '' : ",{$request->route('bottle')?->id},id")],
             'image' => ['nullable', 'string', 'max:500'],
-            'image_file' => ['nullable', ...ImageUpload::RULES],
+            'image_file' => ['nullable', ...ImageUpload::LAYER_RULES],
             'size_id' => ['required', 'exists:sizes,id'],
             'additional_price' => ['required', 'numeric', 'min:0'],
             'stock' => ['required', 'integer', 'min:0'],
             'sort_order' => ['required', 'integer', 'min:0'],
             'status' => ['required', 'in:ACTIVE,INACTIVE'],
+            ...CustomizerLayers::rules(),
+            ...CustomizerLayers::labelRules(),
         ];
 
         if ($isCreate) {

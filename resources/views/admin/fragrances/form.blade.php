@@ -6,7 +6,7 @@
 @endphp
 <x-admin-layout :title="$fragrance ? 'Edit Fragrance' : 'New Fragrance'">
     <div class="max-w-3xl rounded-lg border border-neutral-200 bg-white p-6">
-        <form method="POST" action="{{ $fragrance ? route('admin.fragrances.update', $fragrance) : route('admin.fragrances.store') }}" class="space-y-6">
+        <form method="POST" action="{{ $fragrance ? route('admin.fragrances.update', $fragrance) : route('admin.fragrances.store') }}" enctype="multipart/form-data" class="space-y-6">
             @csrf
             @if ($fragrance) @method('PUT') @endif
 
@@ -17,9 +17,29 @@
                 <x-admin.field name="name" label="Name" :value="$fragrance?->name" required />
                 <x-admin.field name="slug" label="Slug" :value="$fragrance?->slug" required />
                 <x-admin.select name="gender" label="Gender" :options="['MEN' => 'Men', 'WOMEN' => 'Women', 'UNISEX' => 'Unisex']" :selected="$fragrance?->gender ?? 'UNISEX'" required />
-                <x-admin.field name="image" label="Image URL" :value="$fragrance?->image" />
                 <x-admin.select name="status" label="Status" :options="['ACTIVE' => 'Active', 'INACTIVE' => 'Inactive']" :selected="$fragrance?->status ?? 'ACTIVE'" required />
             </div>
+
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div class="space-y-3">
+                    <x-admin.image-upload name="image_file" label="Fragrance Image" :current="$fragrance?->image" accept="image/png,image/webp,image/jpeg" spec="fragrance"
+                        hint="Shown on the fragrance option in the customizer. PNG / WebP / JPG." />
+                    <x-admin.field name="image" label="or Image URL" :value="$fragrance?->image" />
+                </div>
+                <div class="space-y-3">
+                    <x-admin.image-upload name="liquid_image_file" label="Liquid Layer (optional)" :current="$fragrance?->liquid_image" spec="liquid"
+                        hint="Transparent PNG / WebP of the coloured liquid, drawn inside the bottle (z between bottle and cap). Leave empty to use the bottle artwork's own liquid." />
+                    <x-admin.field name="liquid_image" label="or Liquid Image URL" :value="$fragrance?->liquid_image" />
+                    @if ($fragrance?->liquid_image)
+                        <label class="flex items-center gap-2 text-xs text-rose-600">
+                            <input type="checkbox" name="remove_liquid_image" value="1" class="rounded border-neutral-300"> Remove liquid layer
+                        </label>
+                    @endif
+                </div>
+            </div>
+
+            <x-admin.layer-fields :model="$fragrance" title="Liquid layer default position" :defaults="['top' => 30, 'left' => 27, 'width' => 46, 'z' => 20]"
+                hint="Only used when a liquid layer is set. Per-bottle fits are saved from the Alignment Tool." />
 
             <x-admin.field name="short_description" label="Short Description" :value="$fragrance?->short_description" required />
             <x-admin.textarea name="description" label="Description" :value="$fragrance?->description" required />

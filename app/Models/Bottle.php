@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Bottle extends Model
@@ -13,7 +14,8 @@ class Bottle extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'id', 'name', 'code', 'image', 'size_id', 'additional_price', 'stock', 'status', 'sort_order',
+        'id', 'name', 'code', 'image', 'layer_top', 'layer_left', 'layer_width', 'layer_z',
+        'label_top', 'label_left', 'label_width', 'size_id', 'additional_price', 'stock', 'status', 'sort_order',
     ];
 
     protected function casts(): array
@@ -22,6 +24,13 @@ class Bottle extends Model
             'additional_price' => 'decimal:2',
             'stock' => 'integer',
             'sort_order' => 'integer',
+            'layer_top' => 'float',
+            'layer_left' => 'float',
+            'layer_width' => 'float',
+            'layer_z' => 'integer',
+            'label_top' => 'float',
+            'label_left' => 'float',
+            'label_width' => 'float',
         ];
     }
 
@@ -29,6 +38,12 @@ class Bottle extends Model
     public function size(): BelongsTo
     {
         return $this->belongsTo(Size::class);
+    }
+
+    /** @return HasMany<CustomizerLayerOverride, $this> */
+    public function layerOverrides(): HasMany
+    {
+        return $this->hasMany(CustomizerLayerOverride::class);
     }
 
     /** @return HasOne<BottleInventory, $this> */

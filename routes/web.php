@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\BottleController;
 use App\Http\Controllers\Admin\CapController;
 use App\Http\Controllers\Admin\ClassificationController;
 use App\Http\Controllers\Admin\CouponController;
+use App\Http\Controllers\Admin\CustomizerAlignmentController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FragranceController;
 use App\Http\Controllers\Admin\OfferController;
@@ -31,6 +32,10 @@ Route::name('admin.')->group(function () {
         Route::resource('bottles', BottleController::class)->except('show');
         Route::resource('caps', CapController::class)->except('show');
         Route::resource('sizes', SizeController::class)->except('show');
+
+        Route::get('/customizer/alignment', [CustomizerAlignmentController::class, 'index'])->name('customizer.alignment');
+        Route::post('/customizer/alignment', [CustomizerAlignmentController::class, 'update'])->name('customizer.alignment.update');
+
         Route::resource('classifications', ClassificationController::class)->except('show');
         Route::resource('offers', OfferController::class)->except('show');
         Route::resource('coupons', CouponController::class)->except('show')->parameters(['coupons' => 'coupon']);

@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             BottleSeeder::class,
             CapSeeder::class,
             ProductSeeder::class,
+            CustomizerSeeder::class,
             ShippingMethodSeeder::class,
             CouponSeeder::class,
         ]);

@@ -6,6 +6,7 @@
         <table class="w-full text-sm">
             <thead>
                 <tr class="border-b border-neutral-100 bg-neutral-50 text-left text-xs uppercase tracking-wider text-neutral-500">
+                    <th class="w-20 px-5 py-3">Image</th>
                     <th class="px-5 py-3">Name</th>
                     <th class="px-5 py-3">Size</th>
                     <th class="px-5 py-3">+ Price</th>
@@ -17,6 +18,13 @@
             <tbody>
                 @forelse ($bottles as $bottle)
                     <tr class="border-b border-neutral-50 last:border-0 hover:bg-neutral-50">
+                        <td class="px-5 py-2">
+                            @if ($bottle->image)
+                                <img src="{{ \App\Support\CustomizerLayers::assetUrl($bottle->image) }}" alt="{{ $bottle->name }}" loading="lazy" class="h-14 w-14 rounded-md border border-neutral-100 bg-neutral-50 object-contain p-1">
+                            @else
+                                <div class="flex h-14 w-14 items-center justify-center rounded-md bg-neutral-100 text-[10px] text-neutral-400">No image</div>
+                            @endif
+                        </td>
                         <td class="px-5 py-3 text-neutral-800">{{ $bottle->name }}<span class="ml-2 font-mono text-xs text-neutral-400">{{ $bottle->code }}</span></td>
                         <td class="px-5 py-3 text-neutral-600">{{ $bottle->size?->display_name }}</td>
                         <td class="px-5 py-3 text-neutral-600">₹{{ number_format($bottle->additional_price, 2) }}</td>
@@ -33,7 +41,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="6" class="px-5 py-8 text-center text-neutral-400">No bottles yet.</td></tr>
+                    <tr><td colspan="7" class="px-5 py-8 text-center text-neutral-400">No bottles yet.</td></tr>
                 @endforelse
             </tbody>
         </table>
