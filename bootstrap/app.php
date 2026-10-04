@@ -34,6 +34,11 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (ValidationException $e, Request $request) {
+            // Admin (web) forms keep Laravel's default: redirect back with errors + old input.
+            if (! $request->is('api/*') && ! $request->expectsJson()) {
+                return null;
+            }
+
             return response()->json([
                 'message' => $e->getMessage(),
                 'code' => 'VALIDATION_ERROR',
