@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\User;
 use App\Services\OrderService;
 use App\Support\Presenters;
 use Illuminate\Http\JsonResponse;
@@ -31,7 +32,8 @@ class OrderController extends Controller
         ]);
 
         $customer = $data['customer'];
-        $customer['userId'] = $request->user('sanctum')?->id;
+        $user = $request->user('sanctum');
+        $customer['userId'] = $user?->id;
 
         $order = $this->orderService->create(
             $customer,
@@ -41,9 +43,45 @@ class OrderController extends Controller
             $data['items'],
         );
 
+        if ($user) {
+            $this->rememberCheckoutDetails($user, $data['customer']);
+        }
+
         // The access key is returned once, to whoever placed the order, so the
         // confirmation page works for guests too (see show()).
         return response()->json([...Presenters::order($order), 'accessToken' => $order->access_token], 201);
+    }
+
+    /**
+     * Signed-in checkout keeps the customer's details current: name + mobile
+     * on the account, and the shipping details as their default address (so
+     * the next checkout is pre-filled). The login email is never changed
+     * here; the checkout email is kept on the address. Runs after the order
+     * exists -- a failure here must never fail the order.
+     *
+     * @param  array<string, string>  $details
+     */
+    private function rememberCheckoutDetails(User $user, array $details): void
+    {
+        try {
+            $user->update(['name' => $details['fullName'], 'mobile' => $details['mobile']]);
+
+            $values = [
+                'full_name' => $details['fullName'],
+                'mobile' => $details['mobile'],
+                'email' => $details['email'],
+                'address_line' => $details['address'],
+                'city' => $details['city'],
+                'state' => $details['state'],
+                'pincode' => $details['pincode'],
+                'is_default' => true,
+            ];
+
+            $default = $user->addresses()->orderByDesc('is_default')->orderByDesc('id')->first();
+            $default ? $default->update($values) : $user->addresses()->create($values);
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 
     /** GET /api/orders -- authenticated customer's order history. */

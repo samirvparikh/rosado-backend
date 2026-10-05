@@ -20,7 +20,9 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'mobile' => $user->mobile,
             ],
-            'addresses' => $user->addresses->map(fn ($a) => [
+            'addresses' => $user->addresses->sortByDesc(fn ($a) => [$a->is_default, $a->id])->map(fn ($a) => [
+                'id' => (string) $a->id,
+                'isDefault' => (bool) $a->is_default,
                 'fullName' => $a->full_name,
                 'mobile' => $a->mobile,
                 'email' => $a->email,
